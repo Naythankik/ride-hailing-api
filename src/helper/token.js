@@ -22,8 +22,13 @@ const createAccessToken = (payload, duration) => {
     });
 }
 
+const verifyAccessToken = (token) => {
+    return jwt.verify(token, JWT_SECRET);
+}
+
 module.exports = {
     generateOTP,
     generateToken,
-    createAccessToken
+    createAccessToken,
+    verifyAccessToken,
 };

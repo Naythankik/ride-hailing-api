@@ -1,3 +1,4 @@
+const {verifyAccessToken, createAccessToken} = require("../helper/token");
 
 const authentication = async (req, res, next) => {
     const {
@@ -11,7 +12,7 @@ const authentication = async (req, res, next) => {
     const token = authorization.substring(7);
 
     try {
-        const { email, id, exp } = await verifyToken(token);
+        const { email, id, exp } = await verifyAccessToken(token);
 
         const now = Date.now().valueOf() / 1000;
 
@@ -21,7 +22,7 @@ const authentication = async (req, res, next) => {
 
         const gracePeriod = 5 * 60;
         if (exp - now <= gracePeriod) {
-            const newToken = await createToken({ email, id }, "2h");
+            const newToken = await createAccessToken({ email, id }, "2h");
 
             res.cookie("token", newToken, {
                 httpOnly: true,
@@ -45,6 +46,5 @@ const authentication = async (req, res, next) => {
         return res.status(500).send({ message: "Internal server error", error: err.message });
     }
 };
-
 
 module.exports = authentication;
