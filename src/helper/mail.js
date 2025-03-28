@@ -27,7 +27,7 @@ const sendMail = async (receiver, subject, message) => {
     }
 }
 
-const getMessageTemplate = (header, content, warning, body, otp = null, token = null) => {
+const getMessageTemplate = (header, content, warning, otp = null, token = null) => {
     const url = `${process.env.HOSTED_URL}/account-verification/${token}`;
 
     return `

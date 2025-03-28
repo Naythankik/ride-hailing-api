@@ -40,7 +40,8 @@ const register = async (req, res) => {
                     header,
                     content,
                     warning,
-                    token.otp
+                    token.otp,
+                    token.token
                 ));
             }catch (e){
                 console.error(e)
@@ -144,8 +145,62 @@ const verifyAccount = async (req, res) => {
     }
 }
 
+const requestVerification = async (req, res) => {
+    const { error, value } = Joi.object({
+        'email': Joi.string().email().required(),
+    }).validate(req.body, { abortEarly: false});
+
+    if (error) {
+        return res.status(422).json({ message: error.details.map(err => err.message) });
+    }
+
+    const { email } = value;
+
+    try{
+        const user = await User.findOne({email});
+
+        if (!user) {
+            return res.status(401).send({message: "Invalid credentials, Try again!"});
+        }
+
+        if(user.isVerified){
+            return res.status(422).json({message: "User is verified already!"})
+        }
+
+        try {
+            const token = await Token.create({
+                otp: await generateOTP(),
+                token: generateToken(),
+                user: user._id,
+                expiresIn: Date.now() + 10 * 60 * 1000
+            });
+
+            const subject = 'Email Re-Verification'
+            const header = 'Your One-Time Password (OTP)';
+            const content = 'We received a request to verify your account with a one-time password (OTP). Please use the following code to complete your verification:';
+            const warning = 'This OTP is valid for 10 minutes only.';
+
+            await sendMail(user.email, subject, getMessageTemplate(
+                header,
+                content,
+                warning,
+                token.otp,
+                token.token
+            ));
+        }catch (e){
+            console.error(e)
+            return res.status(422).json({ message: e.message });
+        }
+
+        return res.status(200).send({message: "Re-Verification has been sent to the provided email"})
+    }catch(err){
+        return res.status(500).send({error: err.message})
+    }
+}
+
 module.exports = {
     register,
     login,
-    verifyAccount
+    verifyAccount,
+    requestVerification
 };
