@@ -13,7 +13,7 @@ const generateOTP = async () => {
 }
 
 const generateToken = () => {
-    return crypto.randomBytes(16).toString("hex");
+    return crypto.randomBytes(48).toString("hex");
 }
 
 const createAccessToken = (payload, duration) => {

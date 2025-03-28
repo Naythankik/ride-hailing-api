@@ -1,7 +1,7 @@
 const {default: mongoose} = require("mongoose");
 
 const Token = new mongoose.Schema({
-    userId: { type: mongoose.Types.ObjectId, ref: 'User' },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     otp: {
         type: Number,
         required: false,

@@ -5,6 +5,7 @@ const Token = require('../models/token');
 const userResource = require('../resources/userResource');
 const { generateOTP, generateToken, createAccessToken} = require("../helper/token");
 const { sendMail, getMessageTemplate } = require("../helper/mail");
+const Joi = require("joi");
 
 const register = async (req, res) => {
     const { error, value } = registerRequest(req.body);
@@ -26,7 +27,7 @@ const register = async (req, res) => {
                 const token = await Token.create({
                     otp: await generateOTP(),
                     token: generateToken(),
-                    userId: newUser._id,
+                    user: newUser._id,
                     expiresIn: Date.now() + 10 * 60 * 1000
                 });
 
@@ -102,7 +103,49 @@ const login = async (req, res) => {
     }
 }
 
+const verifyAccount = async (req, res) => {
+    const { token } = req.params;
+
+    const { error, value } = Joi.object({
+        'otp': Joi.number().required(),
+    }).validate(req.body, { abortEarly: false});
+
+    if (error) {
+        return res.status(422).json({ message: error.details.map(err => err.message) });
+    }
+
+    try {
+        const userToken = await Token.findOne({token}).populate("user");
+
+        if (!userToken) {
+            return res.status(400).json({ message: "Token is invalid" });
+        }
+
+        if(userToken.otp !== value.otp){
+            return res.status(401).send({message: "OTP is invalid"})
+        }
+
+        if(userToken.expiresIn <= Date.now()) {
+            return res.status(401).send({
+                message: "Token expired"
+            })
+        }
+
+        userToken.user.isVerified = true;
+        await userToken.user.save();
+
+        await Token.findByIdAndDelete(userToken._id)
+
+        return res.status(200).send({ message: "User verified successfully" });
+    } catch (err) {
+        return res.status(500).send({
+            message: err.message,
+        });
+    }
+}
+
 module.exports = {
     register,
-    login
+    login,
+    verifyAccount
 };
