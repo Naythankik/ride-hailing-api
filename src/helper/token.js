@@ -1,4 +1,7 @@
 const crypto = require("crypto");
+const jwt = require('jsonwebtoken')
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const Token = require('../models/token');
 const generateOTP = async () => {
     const otp = Math.floor(100000 + Math.random() * 900000);
@@ -13,7 +16,14 @@ const generateToken = () => {
     return crypto.randomBytes(16).toString("hex");
 }
 
+const createAccessToken = (payload, duration) => {
+    return jwt.sign(payload, JWT_SECRET, {
+        expiresIn: duration
+    });
+}
+
 module.exports = {
     generateOTP,
-    generateToken
+    generateToken,
+    createAccessToken
 };

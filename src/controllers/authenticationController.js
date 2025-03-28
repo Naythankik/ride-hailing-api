@@ -1,8 +1,9 @@
 const registerRequest = require('../requests/registerRequest')
+const loginRequest = require('../requests/loginRequest')
 const User = require('../models/user');
 const Token = require('../models/token');
 const userResource = require('../resources/userResource');
-const { generateOTP, generateToken } = require("../helper/token");
+const { generateOTP, generateToken, createAccessToken} = require("../helper/token");
 const { sendMail, getMessageTemplate } = require("../helper/mail");
 
 const register = async (req, res) => {
@@ -60,6 +61,48 @@ const register = async (req, res) => {
     }
 }
 
+const login = async (req, res) => {
+    const { error, value } = loginRequest(req.body);
+
+    if (error) {
+        return res.status(422).json({ message: error.details.map(err => err.message) });
+    }
+
+    try {
+        const {email, password} = value;
+        const user = await User.findOne({email});
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Invalid credentials, Try again!" });
+        }
+
+        const doesPasswordMatch = await user.comparePassword(password);
+        if (!doesPasswordMatch) {
+            return res.status(401).send({
+                success: false,
+                message: "Invalid credentials, Try again!",
+            });
+        }
+
+        if (!user.isVerified) {
+            return res.status(401).json({ success: false, message: "User account has not been verified" });
+        }
+
+        user.password = undefined;
+
+        const token = await createAccessToken({ email: user.email, id: user._id }, "3h");
+
+        return res.status(200).send({
+            access_token : token,
+            admin: userResource(user)
+        });
+    }catch (error) {
+        console.error(error);
+        return res.status(400).send(error.message);
+    }
+}
+
 module.exports = {
-    register
+    register,
+    login
 };
