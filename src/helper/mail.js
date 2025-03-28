@@ -27,8 +27,8 @@ const sendMail = async (receiver, subject, message) => {
     }
 }
 
-const getMessageTemplate = (header, content, warning, otp = null, token = null) => {
-    const url = `${process.env.HOSTED_URL}/account-verification/${token}`;
+const getMessageTemplate = (header, content, warning, otp = null, token = null, route = null) => {
+    const url = `${process.env.HOSTED_URL}/${route}/${token}`;
 
     return `
             <div style="text-align: center; margin: 0;">
