@@ -1,5 +1,6 @@
+const User = require("../models/user");
 
-const authorization = async (req, res, next) => {
+const adminAuthorization = async (req, res, next) => {
     const {
         headers: { authorization },
     } = req;
@@ -46,5 +47,34 @@ const authorization = async (req, res, next) => {
     }
 };
 
+const riderAuthorization = async (req, res, next) => {
+    const { email } = req.payload;
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(401).send({ message: "User not found" });
+    }
 
-module.exports = authorization;
+    if(user.role !== "rider") {
+        return res.status(401).send({ message: "Invalid role" });
+    }
+    next()
+}
+
+const userAuthorization = async (req, res, next) => {
+    const { email } = req.payload;
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(401).send({ message: "User not found" });
+    }
+
+    if(user.role !== "user") {
+        return res.status(401).send({ message: "Invalid role" });
+    }
+    next()
+}
+
+module.exports = {
+    adminAuthorization,
+    riderAuthorization,
+    userAuthorization,
+};

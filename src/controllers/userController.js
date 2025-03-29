@@ -1,7 +1,10 @@
 const User = require('../models/user');
 const userResource = require('../resources/userResource');
 const updateUserRequest = require('../requests/updateUserRequest');
+
 const Joi = require("joi");
+
+
 const profile = async (req, res) => {
     try{
         const user = await User.findById(req.payload.id)
@@ -79,5 +82,5 @@ module.exports = {
     profile,
     logout,
     update,
-    changePassword
+    changePassword,
 };

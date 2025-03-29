@@ -1,5 +1,5 @@
 const {verifyAccessToken, createAccessToken} = require("../helper/token");
-
+const User = require("../models/user");
 const authentication = async (req, res, next) => {
     const {
         headers: { authorization },
@@ -13,6 +13,12 @@ const authentication = async (req, res, next) => {
 
     try {
         const { email, id, exp } = await verifyAccessToken(token);
+
+        const user = await User.findOne({email});
+
+        if(!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
 
         const now = Date.now().valueOf() / 1000;
 

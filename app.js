@@ -13,7 +13,7 @@ const paymentsRoutes = require('./routes/payment');
 const adminRoutes = require('./routes/admin');
 
 const authentication = require('./src/middleware/authentication');
-const authorization = require('./src/middleware/authorization');
+const { adminAuthorization } = require("./src/middleware/authorization");
 
 const app = express();
 app.use(helmet());
@@ -27,7 +27,7 @@ app.use('/api/v1/ride-hailing/user', authentication, userRoutes);
 app.use('/api/v1/ride-hailing/rides', authentication, bookingRoutes);
 app.use('/api/v1/ride-hailing/reviews', authentication, reviewRoutes);
 app.use('/api/v1/ride-hailing/payments', authentication, paymentsRoutes);
-app.use('/api/v1/ride-hailing/admin', authorization, authentication, adminRoutes);
+app.use('/api/v1/ride-hailing/admin', authentication, adminAuthorization, adminRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
