@@ -1,8 +1,10 @@
 const userResource = require("../resources/userResource");
 const historyResource = require("../resources/historyResource");
+const rideResource = require("../resources/rideResource");
 
 const User = require("../models/user");
 const History = require("../models/history");
+const Ride = require("../models/ride");
 
 const getAllUsers = async (req, res) => {
     const { id } = req.payload;
@@ -17,6 +19,26 @@ const getAllUsers = async (req, res) => {
             perPage: limit,
             pageNumber: page,
             data: userResource(users),
+        });
+    }catch(error){
+        console.error(error);
+        return res.status(500).send({message: 'Something went wrong'});
+    }
+}
+
+const getAllRides = async (req, res) => {
+    const { id } = req.payload;
+    try{
+        const { page = 1, limit = 30 } = req.query;
+        const skip = (page - 1) * limit;
+        const query = {_id: {$ne : id}, role: {$ne: 'admin'} };
+
+        const rides = await Ride.find(query).populate('rider', '-password -isVerified -role -dateOfBirth').skip(skip).limit(limit);
+        return res.status(200).json({
+            totalUsers: await Ride.find(query).countDocuments(),
+            perPage: limit,
+            pageNumber: page,
+            data: rideResource(rides),
         });
     }catch(error){
         console.error(error);
@@ -42,7 +64,21 @@ const getAUser = async (req, res) => {
     }
 }
 
+const getARide = async (req, res) => {
+    const { id } = req.params;
+    try{
+        const user = await Ride.findById(id).populate('rider', '-password -isVerified -role -dateOfBirth');
+
+        return res.status(200).json({ride: rideResource(user)});
+    }catch(error){
+        console.error(error);
+        return res.status(500).send({message: 'Something went wrong'});
+    }
+}
+
 module.exports = {
     getAllUsers,
-    getAUser
+    getAUser,
+    getAllRides,
+    getARide
 }
