@@ -8,7 +8,7 @@ const History = new mongoose.Schema({
     },
     rider: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
     },
     pickupLocation: {
         type: {
@@ -45,6 +45,11 @@ const History = new mongoose.Schema({
         type: String,
         enum: ['pending', 'paid'],
         default: 'pending',
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['card', 'cash'],
+        default: 'cash',
     },
 }, {timestamps: true});
 

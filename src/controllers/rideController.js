@@ -191,16 +191,43 @@ const completeRide = async (req, res) => {
 
 const getHistories = async (req, res) => {
     const { id } = req.payload;
+    const { page = 1, limit = 4, date } = req.query;
+    const skip = (page - 1) * limit;
 
     try{
         let role;
         const user = await User.findById(id);
         role = user.role === 'rider' ? 'rider' : 'user';
 
-        const histories = await History.find({ [ role ]: id });
+        const histories = await History.find({ [ role ]: id })
+            .populate(role === 'rider' ? 'user' : 'rider', 'firstName lastName telephone profilePicture')
+            .skip(skip).limit(limit);
 
         return res.status(200).json({
+            totalHistories: await History.find({ [ role ]: id }).countDocuments(),
+            perPage: limit,
+            pageNumber: page,
             data: histories.length ? historyResource(histories) : []
+        });
+    }catch(err){
+        return res.status(500).json({error: err.message})
+    }
+
+}
+
+const getHistory = async (req, res) => {
+    const { id } = req.payload;
+    const { id: historyId } = req.params;
+
+    try{
+        const user = await User.findById(id);
+
+        const histories = await History.findById(historyId)
+            .populate(user.role === 'rider' ? 'user' : 'rider', `firstName lastName telephone profilePicture`);
+
+
+        return res.status(200).json({
+            data:  historyResource(histories)
         });
     }catch(err){
         return res.status(500).json({error: err.message})
@@ -242,5 +269,6 @@ module.exports = {
     readRequest,
     startRide,
     completeRide,
-    getHistories
+    getHistories,
+    getHistory
 };

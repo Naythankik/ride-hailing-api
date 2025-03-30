@@ -1,6 +1,7 @@
 const express = require('express');
-const { registerRide, updateRide, findRides, requestRide, acceptRide, readRequest, startRide, completeRide, cancelRequest,
-    getHistories
+const { registerRide, updateRide, findRides, requestRide, acceptRide,
+    readRequest, startRide, completeRide, cancelRequest, getHistories,
+    getHistory
 } = require("../src/controllers/rideController");
 const { riderAuthorization, userAuthorization } = require("../src/middleware/authorization");
 const router = express.Router();
@@ -10,6 +11,7 @@ router.put('/update', riderAuthorization, updateRide);
 
 router.get('/available',userAuthorization, findRides);
 router.get('/history', getHistories);
+router.get('/history/:id', getHistory);
 
 router.post('/request/:rideId', userAuthorization, requestRide);
 router.post('/start/:requestId', riderAuthorization, startRide);

@@ -1,8 +1,10 @@
 const userFactory = require('./src/factories/userFactory');
 const rideFactory = require('./src/factories/rideFactory');
+const historyFactory = require('./src/factories/historyFactory');
 
 const User = require('./src/models/user');
 const Ride = require('./src/models/ride');
+const History = require('./src/models/history');
 
 require('dotenv').config();
 const connection = require("./config/database");
@@ -31,11 +33,22 @@ const seederRides = async () => {
     }
 };
 
+const seederHistory = async () => {
+    const rides = await historyFactory(50);
+    try {
+        await History.insertMany(rides);
+        console.log('History seeded successfully');
+    } catch (err) {
+        console.error('Error seeding histories:', err);
+        throw err;
+    }
+};
 
 const runSeeders = async () => {
     try {
         await seederUsers();
         await seederRides();
+        await seederHistory();
         console.log('All seeders completed successfully!');
         process.exit(0);
     } catch (err) {
