@@ -1,6 +1,7 @@
 const userResource = require("../resources/userResource");
 const historyResource = require("../resources/historyResource");
 const rideResource = require("../resources/rideResource");
+const errorHandler = require("../helper/error-handler");
 
 const User = require("../models/user");
 const History = require("../models/history");
@@ -22,7 +23,7 @@ const getAllUsers = async (req, res) => {
         });
     }catch(error){
         console.error(error);
-        return res.status(500).send({message: 'Something went wrong'});
+        return res.status(500).json(errorHandler(error));
     }
 }
 
@@ -42,7 +43,7 @@ const getAllRides = async (req, res) => {
         });
     }catch(error){
         console.error(error);
-        return res.status(500).send({message: 'Something went wrong'});
+        return res.status(500).send(errorHandler(error));
     }
 }
 
@@ -59,8 +60,7 @@ const getAUser = async (req, res) => {
             rides: historyResource(histories)
         });
     }catch(error){
-        console.error(error);
-        return res.status(500).send({message: 'Something went wrong'});
+        return res.status(500).json(errorHandler(error));
     }
 }
 
@@ -71,8 +71,60 @@ const getARide = async (req, res) => {
 
         return res.status(200).json({ride: rideResource(user)});
     }catch(error){
-        console.error(error);
-        return res.status(500).send({message: 'Something went wrong'});
+        return res.status(500).json(errorHandler(error));
+    }
+}
+
+const blockUser = async (req, res) => {
+    const { userId } = req.params;
+    const { id: adminId } = req.payload;
+
+    try{
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(404).json(errorHandler({message:'not found'}));
+        }
+
+        await superAdminAction(user, adminId)
+
+        user.status = 'blocked';
+        await user.save();
+        return res.status(200).send({message: 'User has been blocked successfully'});
+    }catch(error){
+        return res.status(500).json(errorHandler(error));
+    }
+}
+
+const deleteUser = async (req, res) => {
+    const { userId } = req.params;
+    const { id: adminId } = req.payload;
+
+    try{
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(404).json(errorHandler({message: 'not found'}));
+        }
+
+        await superAdminAction(user, adminId)
+        await user.deleteOne();
+
+        return res.status(200).send({message: 'User has been deleted successfully'});
+    }catch(error){
+        return res.status(403).json(errorHandler(error));
+    }
+}
+
+const superAdminAction = async (user, adminId) => {
+    if (user.role === 'admin') {
+        const superAdmin = await User.findById(adminId);
+
+        if (!superAdmin) {
+            throw new Error('not found');
+        }
+
+        if (superAdmin.role !== 'super-admin') {
+            throw new Error('Super Authorized access');
+        }
     }
 }
 
@@ -80,5 +132,7 @@ module.exports = {
     getAllUsers,
     getAUser,
     getAllRides,
-    getARide
+    getARide,
+    blockUser,
+    deleteUser,
 }

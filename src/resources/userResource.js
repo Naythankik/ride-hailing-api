@@ -8,6 +8,7 @@ const userResource = (user) => {
         role: user.role,
         dateOfBirth: user.dateOfBirth,
         isVerified: user.isVerified,
+        status: user.status,
         rememberToken: user.rememberToken,
         createdAt: user.createdAt ?? null,
         updatedAt: user.updatedAt ?? null

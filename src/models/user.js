@@ -43,6 +43,12 @@ const User = new mongoose.Schema({
         required: false,
         default: 'picture.png',
     },
+    status: {
+        type: String,
+        required: false,
+        enum: ['blocked', 'active', 'inactive', 'pending'],
+        default: 'active',
+    },
     rememberToken: String,
 }, { timestamps: true });
 
