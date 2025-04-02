@@ -1,8 +1,10 @@
+const userResource = require('./userResource');
+
 const historyResource = (history) => {
     return {
         id: history._id,
         rider: history.rider,
-        user: history.user,
+        user: userResource(history.user),
         pickupLocation: history.pickupLocation,
         destinationLocation: history.destinationLocation,
         fare: history.fare,

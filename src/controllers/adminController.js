@@ -53,7 +53,7 @@ const getAUser = async (req, res) => {
         const user = await User.findById(id);
         const role = user.role === 'rider' ? 'rider' : 'user';
         const histories = await History.find({ [ role ]: user._id }).
-        populate(`${user.role !== 'rider' ? 'rider' : 'user'}`, '-password -isVerified -role -dateOfBirth');
+        populate(`${user.role !== 'rider' ? 'rider' : 'user'}`, '-password -isVerified -role -dateOfBirth -ratings -status');
 
         return res.status(200).json({
             user: userResource(user),

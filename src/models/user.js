@@ -49,6 +49,16 @@ const User = new mongoose.Schema({
         enum: ['blocked', 'active', 'inactive', 'pending'],
         default: 'active',
     },
+    ratings: {
+        value: {
+            type: Number,
+            default: 0,
+        },
+        numberOfRaters: {
+            type: Number,
+            default: 0
+        }
+    },
     rememberToken: String,
 }, { timestamps: true });
 

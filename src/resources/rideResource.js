@@ -1,3 +1,5 @@
+const userResource = require("./userResource");
+
 const rideResource = (ride) => {
     return {
         id: ride._id,
@@ -8,7 +10,7 @@ const rideResource = (ride) => {
         color: ride.color,
         condition: ride.condition,
         location: ride.currentLocation,
-        rider: ride.rider,
+        rider: userResource(ride.rider),
         picture: ride.picture,
         price: ride.price ?? null,
         createdAt: ride.createdAt ?? null,
