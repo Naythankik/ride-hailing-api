@@ -3,20 +3,25 @@ const reviewRequest = require('../requests/reviewRequest');
 const History = require('../models/history');
 const User = require('../models/user');
 
-
-const rateUser = async (req, res) => {}
-
-const rateRider = async (req, res) => {
+const rateResource = async (req, res, resourceType) => {
     const { error , value } = reviewRequest(req.body);
+
     if(error){
         return res.status(400).send(error.details[0].message);
     }
+
     const { rideId } = req.params;
     const { id } = req.payload
     try{
-        const { rider } = await getResource(rideId, id);
+        const ride = await getResource(rideId, id);
+        const resource = ride[resourceType];
 
-        await calculate(rider,value.rating)
+        if (!resource) {
+            return res.status(400).json(errorHandler({message: 'not found'}));
+        }
+
+        await calculate(resource,value.rating)
+
         return res.status(200).json({
             message: 'Thanks for the review!',
         })
@@ -49,6 +54,6 @@ const calculate = async (resourceId, value) => {
     await user.save();
 }
 module.exports = {
-    rateUser,
-    rateRider,
+    rateUser : (req, res) => rateResource(req, res, 'user'),
+    rateRider: (req, res) => rateResource(req, res, 'rider')
 }

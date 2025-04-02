@@ -9,7 +9,7 @@ const userResource = (user) => {
         dateOfBirth: user.dateOfBirth,
         isVerified: user.isVerified,
         status: user.status,
-        rating: (user.ratings?.value / user.ratings?.numberOfRaters) * 5 ?? null,
+        rating: ((user.ratings?.value / user.ratings?.numberOfRaters) * 5).toFixed(1) ?? null,
         rememberToken: user.rememberToken,
         createdAt: user.createdAt ?? null,
         updatedAt: user.updatedAt ?? null
